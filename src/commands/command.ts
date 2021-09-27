@@ -4,6 +4,8 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import path from 'path';
 import fs from 'fs';
 
+export type SlashCommandCategory = 'admin' | 'fun' | 'moderation' | 'utility' | 'music' | 'misc';
+
 
 export class CommandManager {
     private commands: Command[] = [];
@@ -23,7 +25,7 @@ export class CommandManager {
 
     public slash(command: string, interaction: CommandInteraction): void {
         const commandToExecute = this.slashCommands.find(
-            (c) => c.name === command
+            (c) => c.discordCommand.name === command
         );
 
         if (commandToExecute) {
@@ -35,7 +37,7 @@ export class CommandManager {
 
     public menu(command: string, interaction: ContextMenuInteraction): void {
         const commandToExecute = this.menuCommands.find(
-            (c) => c.name === command
+            (c) => c.discordCommand.name === command
         );
 
         if (commandToExecute) {
@@ -79,12 +81,21 @@ export class CommandManager {
 }
 
 export interface Command {
-    name: string;
     discordCommand: any;
+    slashCommandCategory?: SlashCommandCategory;
     interactionIds?: string[];
     slashCommand?: (interaction: CommandInteraction) => void;
     menuCommand?: (interaction: ContextMenuInteraction) => void;
     interact?: (interaction: ButtonInteraction | SelectMenuInteraction) => void;
+}
+
+export interface SlashCommand extends Command {
+    slashCommandCategory: SlashCommandCategory;
+    slashCommand: (interaction: CommandInteraction) => void;
+}
+
+export interface MenuCommand extends Command {
+    menuCommand: (interaction: ContextMenuInteraction) => void;
 }
 
 export function getDiscordCommands(): any[] {

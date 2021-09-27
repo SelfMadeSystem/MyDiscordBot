@@ -1,12 +1,13 @@
-import { Command } from '../command';
+import { SlashCommand } from '../command';
 import { CommandInteraction, Message, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, ButtonInteraction, SelectMenuInteraction } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 export const name = 'test';
 
-const command: Command = {
-    name: 'test',
+const command: SlashCommand = {
     interactionIds: ['server_primary', 'server_secondary', 'server_tertiary'],
+
+    slashCommandCategory: 'misc',
 
     slashCommand(interaction: CommandInteraction): void {
         interaction.reply({

@@ -1,9 +1,9 @@
-import { Command } from '../command';
+import { SlashCommand } from '../command';
 import { CommandInteraction, Message, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 
-const command: Command = {
-    name: 'ping',
+const command: SlashCommand = {
+    slashCommandCategory: 'misc',
 
     slashCommand(interaction: CommandInteraction): void {
         interaction.deferReply({ fetchReply: true, }).then((e) => {

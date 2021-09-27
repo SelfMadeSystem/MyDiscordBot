@@ -1,8 +1,7 @@
-import { Command } from '../command';
+import { MenuCommand } from '../command';
 import { ContextMenuInteraction, MessageEmbed } from 'discord.js'
 
-const command: Command = {
-    name: 'User Info',
+const command: MenuCommand = {
     async menuCommand(interaction: ContextMenuInteraction) {
         const member = await interaction.guild.members.fetch(interaction.targetId)
             .catch((e) => { throw e });

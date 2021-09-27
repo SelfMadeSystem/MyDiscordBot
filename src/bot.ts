@@ -32,7 +32,7 @@ export class Bot {
         }
     }
 
-    public async stop() {
+    public stop() {
         this.client.user.setStatus('invisible');
         this.client.destroy();
     }

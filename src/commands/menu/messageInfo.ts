@@ -1,8 +1,7 @@
-import { Command } from '../command';
+import { MenuCommand } from '../command';
 import { ContextMenuInteraction, MessageEmbed, TextChannel, BaseGuildTextChannel } from 'discord.js'
 
-const command: Command = {
-    name: 'Message Info',
+const command: MenuCommand = {
     async menuCommand(interaction: ContextMenuInteraction) {
         const channel = interaction.channel as TextChannel;
         const message = await channel.messages.fetch(interaction.targetId)

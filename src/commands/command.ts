@@ -7,9 +7,13 @@ import fs from 'fs';
 
 export class CommandManager {
     private commands: Command[] = [];
+    private slashCommands: Command[] = [];
+    private menuCommands: Command[] = [];
 
     constructor(private bot: Bot) {
-        this.commands = getCommands();
+        this.slashCommands = getCommands("slash");
+        this.menuCommands = getCommands("menu");
+        this.commands = [...this.slashCommands, ...this.menuCommands];
         this.hook();
     }
 
@@ -18,14 +22,26 @@ export class CommandManager {
     }
 
     public slash(command: string, interaction: CommandInteraction): void {
-        const commandToExecute = this.commands.find(
+        const commandToExecute = this.slashCommands.find(
             (c) => c.name === command
         );
 
         if (commandToExecute) {
             commandToExecute?.slashCommand(interaction);
         } else {
-            console.warn(`Command ${command} not found`);
+            console.warn(`Slash command ${command} not found`);
+        }
+    }
+
+    public menu(command: string, interaction: ContextMenuInteraction): void {
+        const commandToExecute = this.menuCommands.find(
+            (c) => c.name === command
+        );
+
+        if (commandToExecute) {
+            commandToExecute?.menuCommand(interaction);
+        } else {
+            console.warn(`Menu command ${command} not found`);
         }
     }
 
@@ -44,10 +60,13 @@ export class CommandManager {
     private hook() {
         this.bot.getClient().on('interactionCreate', async interaction => {
             if (interaction.isCommand()) {
-
                 const { commandName } = interaction;
 
                 this.slash(commandName, interaction);
+            } else if (interaction.isContextMenu()) {
+                const { commandName } = interaction;
+
+                this.menu(commandName, interaction);
             } else if (interaction.isButton() || interaction.isSelectMenu()) {
                 const { customId } = interaction;
 
@@ -69,13 +88,17 @@ export interface Command {
 }
 
 export function getDiscordCommands(): any[] {
-    return getCommands().map(c => c.discordCommand);
+    return getAllCommands().map(c => c.discordCommand);
 }
 
-export function getCommands(): Command[] {
-    const files = fs.readdirSync(path.join(__dirname, './slash'));
+export function getAllCommands(): Command[] {
+    return getCommands("slash").concat(getCommands("menu"));
+}
+
+export function getCommands(dir: string): Command[] {
+    const files = fs.readdirSync(path.join(__dirname, `./${dir}`));
     const commands = files.map(file => {
-        return require(`./slash/${file}`).default;
+        return require(`./${dir}/${file}`).default;
     });
     return commands;
 }

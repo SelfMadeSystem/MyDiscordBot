@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+      // "noImplicitAny": false,
+      // "noEmitOnError": true,
+      "removeComments": false,
+      // "sourceMap": true,
+      "moduleResolution": "node",
+      "target": "ES2021",
+      "module": "CommonJS",
+      "resolveJsonModule": true,
+      "esModuleInterop": true,
+      "outDir": "dist",
+      "checkJs": false,
+      "skipLibCheck": true
+    },
+    "include": [
+      "src/**/*"
+    ],
+    "exclude": [
+      "node_modules/**/*"
+    ]
+}

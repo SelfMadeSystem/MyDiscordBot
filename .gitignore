@@ -5,4 +5,4 @@ logs/
 .vscode/
 *.sw*
 
-/localconfig.json
+localconfig.json

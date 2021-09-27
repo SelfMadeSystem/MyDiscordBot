@@ -76,15 +76,15 @@ export class Command {
 }
 
 export function getDiscordCommands(): SlashCommandBuilder[] {
-    const files = fs.readdirSync(path.join(__dirname, './commands'));
-    const commands = files.map(file => require(`./commands/${file}`).discordCommand as SlashCommandBuilder);
+    const files = fs.readdirSync(path.join(__dirname, './slash'));
+    const commands = files.map(file => require(`./slash/${file}`).discordCommand as SlashCommandBuilder);
     return commands;
 }
 
 export function getCommands(): Command[] {
-    const files = fs.readdirSync(path.join(__dirname, './commands'));
+    const files = fs.readdirSync(path.join(__dirname, './slash'));
     const commands = files.map(file => {
-        const c = require(`./commands/${file}`);
+        const c = require(`./slash/${file}`);
         return new Command(c.name, c.interactionIds, c.command, c.interact);
     });
     return commands;

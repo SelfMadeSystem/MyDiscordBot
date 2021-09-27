@@ -81,10 +81,10 @@ export class CommandManager {
 export interface Command {
     name: string;
     discordCommand: any;
-    interactionIds?: string[] | undefined;
-    slashCommand?: (interaction: CommandInteraction) => void | undefined;
-    menuCommand?: (interaction: ContextMenuInteraction) => void | undefined;
-    interact?: (interaction: ButtonInteraction | SelectMenuInteraction) => void | undefined;
+    interactionIds?: string[];
+    slashCommand?: (interaction: CommandInteraction) => void;
+    menuCommand?: (interaction: ContextMenuInteraction) => void;
+    interact?: (interaction: ButtonInteraction | SelectMenuInteraction) => void;
 }
 
 export function getDiscordCommands(): any[] {

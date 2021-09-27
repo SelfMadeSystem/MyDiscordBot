@@ -17,13 +17,13 @@ export class CommandManager {
         this.commands.push(command);
     }
 
-    public execute(command: string, interaction: CommandInteraction): void {
+    public slash(command: string, interaction: CommandInteraction): void {
         const commandToExecute = this.commands.find(
             (c) => c.name === command
         );
 
         if (commandToExecute) {
-            commandToExecute.command(interaction);
+            commandToExecute?.slashCommand(interaction);
         } else {
             console.warn(`Command ${command} not found`);
         }
@@ -36,6 +36,8 @@ export class CommandManager {
 
         if (command) {
             command?.interact(interaction);
+        } else {
+            console.warn(`Interaction ${id} not found`);
         }
     }
 
@@ -45,7 +47,7 @@ export class CommandManager {
 
                 const { commandName } = interaction;
 
-                this.execute(commandName, interaction);
+                this.slash(commandName, interaction);
             } else if (interaction.isButton() || interaction.isSelectMenu()) {
                 const { customId } = interaction;
 
@@ -57,35 +59,23 @@ export class CommandManager {
     }
 }
 
-export class Command {
-    public name: string;
-    public interactionIds: string[] | undefined;
-    public command: (interaction: CommandInteraction) => void;
-    public interact: (interaction: ButtonInteraction | SelectMenuInteraction) => void | undefined;
-
-    constructor(
-        name: string,
-        interactionIds: string[] | undefined,
-        command: (interaction: CommandInteraction) => void,
-        interact: (interaction: ButtonInteraction | SelectMenuInteraction) => void | undefined) {
-        this.name = name;
-        this.interactionIds = interactionIds;
-        this.command = command;
-        this.interact = interact;
-    }
+export interface Command {
+    name: string;
+    discordCommand: any;
+    interactionIds?: string[] | undefined;
+    slashCommand?: (interaction: CommandInteraction) => void | undefined;
+    menuCommand?: (interaction: ContextMenuInteraction) => void | undefined;
+    interact?: (interaction: ButtonInteraction | SelectMenuInteraction) => void | undefined;
 }
 
-export function getDiscordCommands(): SlashCommandBuilder[] {
-    const files = fs.readdirSync(path.join(__dirname, './slash'));
-    const commands = files.map(file => require(`./slash/${file}`).discordCommand as SlashCommandBuilder);
-    return commands;
+export function getDiscordCommands(): any[] {
+    return getCommands().map(c => c.discordCommand);
 }
 
 export function getCommands(): Command[] {
     const files = fs.readdirSync(path.join(__dirname, './slash'));
     const commands = files.map(file => {
-        const c = require(`./slash/${file}`);
-        return new Command(c.name, c.interactionIds, c.command, c.interact);
+        return require(`./slash/${file}`).default;
     });
     return commands;
 }

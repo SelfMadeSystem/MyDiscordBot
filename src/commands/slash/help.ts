@@ -1,5 +1,5 @@
 import { SlashCommand, Categories, Command, getAllCommands, getCommandsByCategory } from '../command';
-import { CommandInteraction, Message, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, ColorResolvable } from 'discord.js';
+import { CommandInteraction, Message, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, ColorResolvable, InteractionReplyOptions, ButtonInteraction, SelectMenuInteraction } from 'discord.js';
 import { SlashCommandBuilder, SlashCommandStringOption } from '@discordjs/builders';
 
 function genChoices(): [string, string][] {
@@ -35,34 +35,52 @@ function getCommandDescription(command: Command): MessageEmbed {
     return embed
 }
 
-const command: SlashCommand & { _discordCommand: any, _helpGeneric: MessageEmbed, helpGeneric: MessageEmbed } = {
+var _helpGeneric: InteractionReplyOptions = null;
+
+function helpGeneric() {
+    if (_helpGeneric) return _helpGeneric;
+    const commands = getAllCommands()
+    const commandList = commands.map(c => getCommandName(c))
+    const commandListEmbed = new MessageEmbed()
+        .setTitle("Command List")
+        .setDescription(`Use \`/help [command]\` to get more information about a command.`)
+        .setFooter(`EEE v5`)
+        .setColor("#fff")
+    for (let cat of Categories) {
+        const categoryCommands = getCommandsByCategory(cat)
+        if (categoryCommands.length === 0) continue
+        const categoryCommandList = categoryCommands.map(c => getCommandName(c))
+        commandListEmbed.addField(cat.charAt(0).toUpperCase() + cat.slice(1), categoryCommandList.join('\n'))
+    }
+    return _helpGeneric = {
+        embeds: [commandListEmbed],
+        components: [new MessageActionRow()
+        .addComponents(
+            new MessageSelectMenu()
+            .setMinValues(1)
+            .setMaxValues(1)
+            .setPlaceholder("Select a command for help on it.")
+            .setCustomId("help_helpGeneric")
+            .addOptions(commandList.map(c => {
+                return {
+                    label: c,
+                    value: c
+                }
+            }))
+        )],
+        ephemeral: true,
+    }
+}
+
+const command: SlashCommand & { _discordCommand: any } = {
     commandCategory: 'utility',
     help: {
         name: 'Help',
         description: 'Displays a list of commands and their descriptions.',
-        usage: 'help [command] [...]',
+        usage: 'help [command]',
         examples: ['/help', '/help ping']
     },
-
-    _helpGeneric: null,
-
-    get helpGeneric() {
-        if (this._helpGeneric) return this._helpGeneric;
-        const commands = getAllCommands()
-        const commandList = commands.map(c => getCommandName(c))
-        const commandListEmbed = new MessageEmbed()
-            .setTitle("Command List")
-            .setDescription(`Use \`/help [command]\` to get more information about a command.`)
-            .setFooter(`EEE v5`)
-            .setColor("#fff")
-        for (let cat of Categories) {
-            const categoryCommands = getCommandsByCategory(cat)
-            if (categoryCommands.length === 0) continue
-            const categoryCommandList = categoryCommands.map(c => getCommandName(c))
-            commandListEmbed.addField(cat.charAt(0).toUpperCase() + cat.slice(1), categoryCommandList.join('\n'))
-        }
-        return this._helpGeneric = commandListEmbed
-    },
+    interactionIds: ['help_helpGeneric'],
 
     slashCommand: async (interaction: CommandInteraction) => {
         const cmdName = interaction.options.getString("command");
@@ -78,11 +96,32 @@ const command: SlashCommand & { _discordCommand: any, _helpGeneric: MessageEmbed
                 interaction.reply("Command not found.")
             }
         } else {
-            const embed = command.helpGeneric
-            interaction.reply({
-                ephemeral: true,
-                embeds: [embed]
-            })
+            interaction.reply(helpGeneric())
+        }
+    },
+
+    interact: async (interaction: ButtonInteraction | SelectMenuInteraction) => {
+        switch (interaction.customId) {
+            case "help_helpGeneric":
+                const cmdName = (interaction as SelectMenuInteraction).values[0]
+                if (cmdName) {
+                    const command = getAllCommands().find(c => c.help && c.help.name == cmdName || c.discordCommand.name == cmdName)
+                    if (command) {
+                        const embed = getCommandDescription(command)
+                        interaction.reply({
+                            embeds: [embed],
+                            ephemeral: true
+                        })
+                    } else {
+                        interaction.reply({
+                            content: "Command not found.",
+                            ephemeral: true
+                        })
+                    }
+                } else {
+                    interaction.reply(helpGeneric())
+                }
+                break;
         }
     },
 

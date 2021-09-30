@@ -3,7 +3,7 @@ import { CommandInteraction, Message, MessageEmbed, MessageActionRow, MessageBut
 import { SlashCommandBuilder } from '@discordjs/builders';
 
 const command: SlashCommand = {
-    slashCommandCategory: 'misc',
+    commandCategory: 'misc',
 
     slashCommand(interaction: CommandInteraction): void {
         interaction.deferReply({ fetchReply: true, }).then((e) => {

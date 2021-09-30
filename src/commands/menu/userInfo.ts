@@ -2,6 +2,12 @@ import { MenuCommand } from '../command';
 import { ContextMenuInteraction, MessageEmbed } from 'discord.js'
 
 const command: MenuCommand = {
+    commandCategory: 'utility',
+    help: {
+        name: 'User Info',
+        description: 'Displays information about the user.',
+        usage: 'Right click on a user and hover over  Apps  to see this command.',
+    },
     async menuCommand(interaction: ContextMenuInteraction) {
         const member = await interaction.guild.members.fetch(interaction.targetId)
             .catch((e) => { throw e });

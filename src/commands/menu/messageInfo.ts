@@ -2,6 +2,12 @@ import { MenuCommand } from '../command';
 import { ContextMenuInteraction, MessageEmbed, TextChannel, BaseGuildTextChannel } from 'discord.js'
 
 const command: MenuCommand = {
+    commandCategory: 'utility',
+    help: {
+        name: 'Message Info',
+        description: 'Get information about a message.',
+        usage: 'Right click a message and hover over  Apps  to see this command.'
+    },
     async menuCommand(interaction: ContextMenuInteraction) {
         const channel = interaction.channel as TextChannel;
         const message = await channel.messages.fetch(interaction.targetId)

@@ -4,8 +4,8 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import path from 'path';
 import fs from 'fs';
 
-export type SlashCommandCategory = 'admin' | 'fun' | 'moderation' | 'utility' | 'music' | 'misc';
-
+export type CommandCategory = 'admin' | 'fun' | 'moderation' | 'utility' | 'music' | 'misc';
+export const Categories: CommandCategory[] = ['admin', 'fun', 'moderation', 'utility', 'music', 'misc']
 
 export class CommandManager {
     private commands: Command[] = [];
@@ -82,7 +82,13 @@ export class CommandManager {
 
 export interface Command {
     discordCommand: any;
-    slashCommandCategory?: SlashCommandCategory;
+    help?: {
+        name: string;
+        description: string;
+        usage?: string;
+        examples?: string[];
+    };
+    commandCategory: CommandCategory;
     interactionIds?: string[];
     slashCommand?: (interaction: CommandInteraction) => void;
     menuCommand?: (interaction: ContextMenuInteraction) => void;
@@ -90,11 +96,16 @@ export interface Command {
 }
 
 export interface SlashCommand extends Command {
-    slashCommandCategory: SlashCommandCategory;
     slashCommand: (interaction: CommandInteraction) => void;
 }
 
 export interface MenuCommand extends Command {
+    help: {
+        name: string;
+        description: string;
+        usage?: string;
+        examples?: string[];
+    };
     menuCommand: (interaction: ContextMenuInteraction) => void;
 }
 
@@ -102,11 +113,17 @@ export function getDiscordCommands(): any[] {
     return getAllCommands().map(c => c.discordCommand);
 }
 
-export function getAllCommands(): Command[] {
-    return getCommands("slash").concat(getCommands("menu"));
+const commands = getCommands("slash").concat(getCommands("menu"));
+
+export function getCommandsByCategory(category: CommandCategory): Command[] {
+    return commands.filter(c => c.commandCategory === category);
 }
 
-export function getCommands(dir: string): Command[] {
+export function getAllCommands(): Command[] {
+    return commands;
+}
+
+export function getCommands(dir: "slash" | "menu"): Command[] {
     const files = fs.readdirSync(path.join(__dirname, `./${dir}`));
     const commands = files.map(file => {
         return require(`./${dir}/${file}`).default;

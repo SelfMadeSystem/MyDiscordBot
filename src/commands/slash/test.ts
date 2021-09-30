@@ -1,13 +1,13 @@
 import { SlashCommand } from '../command';
 import { CommandInteraction, Message, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, ButtonInteraction, SelectMenuInteraction } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { SlashCommandBuilder, SlashCommandBooleanOption } from '@discordjs/builders';
 
 export const name = 'test';
 
 const command: SlashCommand = {
     interactionIds: ['server_primary', 'server_secondary', 'server_tertiary'],
 
-    slashCommandCategory: 'misc',
+    commandCategory: 'misc',
 
     slashCommand(interaction: CommandInteraction): void {
         interaction.reply({
@@ -102,7 +102,19 @@ const command: SlashCommand = {
         }
     },
 
-    discordCommand: new SlashCommandBuilder().setName('test').setDescription('Test command.').toJSON()
+    help: {
+        name: "Test",
+        description: "Description for the test command.",
+        usage: "/test",
+        examples: [
+            "/test"
+        ]
+    },
+
+    discordCommand: new SlashCommandBuilder()
+    .setName('test')
+    .setDescription('Test command.')
+    .toJSON()
 }
 
 export default command;

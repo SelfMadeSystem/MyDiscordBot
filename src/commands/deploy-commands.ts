@@ -5,12 +5,14 @@ import { getDiscordCommands } from './command';
 
 const rest = new REST({ version: '9' }).setToken(token);
 
-
+// Finds all commands and adds them to the bot.
+// Replace "applicationGuildCommands" with "applicationCommands" if using in production
 rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: getDiscordCommands() })
 	.then(() => console.log('Successfully registered application commands.'))
 	.catch(console.error);
 
-// removeCommands('user', 'server')
+// Remove unused commands. For example:
+// removeCommands('test', 'test2');
 
 function removeCommands(...commands: string[]) {
 	getCommandIDs(commands).then(ids => {

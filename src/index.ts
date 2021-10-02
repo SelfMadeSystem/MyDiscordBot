@@ -1,13 +1,17 @@
 import { Bot } from './bot';
 import { CommandManager } from './commands/command';
 
+// Import the local config. Must contain the token.
 import localConfig from './localconfig.json';
 
+// Create bot
 const bot = new Bot(localConfig.token);
 
+// Start bot
 bot.start();
 
-const commandManager = new CommandManager(bot);
+// Create command manager
+new CommandManager(bot);
 
 process.on('SIGINT', function () {
   console.warn('SIGINT signal received.');

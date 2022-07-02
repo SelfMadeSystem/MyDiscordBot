@@ -1,5 +1,5 @@
 import { MenuCommand } from '../command';
-import { ContextMenuInteraction, MessageEmbed } from 'discord.js'
+import { ContextMenuInteraction, MessageEmbed } from 'discord.js';
 
 const command: MenuCommand = {
     commandCategory: 'utility',

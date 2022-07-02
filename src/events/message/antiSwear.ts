@@ -22,12 +22,21 @@ const expressions = [
 const handler: Handler = {
     onMessage: (message) => {
         const content = removeZeroWidth(message.content);
-        expressions.forEach(expression => {
+        for (const expression of expressions) {
             if (expression.test(content)) {
                 message.delete();
-                message.channel.send(`${message.author.username} has been deleted for using a bad word.`);
+                message.channel.send("Please don't use profanity.");
+                return;
             }
-        });
+        }
+        const contentWithoutSpaces = content.replace(/\s|\n/g, "");
+        for (const expression of expressions) {
+            if (expression.test(contentWithoutSpaces)) {
+                message.delete();
+                message.channel.send("Please don't use profanity.");
+                return;
+            }
+        }
     }
 }
 

@@ -13,7 +13,11 @@ const command: SlashCommand = {
                         .setColor('#0099ff')
                         .setTitle('Some title')
                         .setURL('https://discord.js.org/')
-                        .setAuthor('Some name', 'https://i.imgur.com/AfFp7pu.png', 'https://discord.js.org')
+                        .setAuthor({
+                            "name": 'Some name',
+                            "iconURL": 'https://i.imgur.com/AfFp7pu.png',
+                            "url": 'https://discord.js.org'
+                        })
                         .setDescription('Some description here')
                         .setThumbnail('https://i.imgur.com/AfFp7pu.png')
                         .addFields(
@@ -25,7 +29,7 @@ const command: SlashCommand = {
                         .addField('Inline field title', 'Some value here', true)
                         .setImage('https://i.imgur.com/AfFp7pu.png')
                         .setTimestamp()
-                        .setFooter('Some footer text here', 'https://i.imgur.com/AfFp7pu.png')]
+                        .setFooter({ "text": 'Some footer text here', "iconURL": 'https://i.imgur.com/AfFp7pu.png' })]
                 })
             }, 1000);
         });

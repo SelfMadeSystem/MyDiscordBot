@@ -13,9 +13,11 @@ export class Bot {
      * Constructor. Initializes the bot with the given token.
      * 
      * @param token Discord token
+     * @param publicKey Public key for the bot to verify interactions
      */
-    constructor(private readonly token: Snowflake) {
-        this.client = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+    constructor(private readonly token: Snowflake,
+        private readonly publicKey: string) {
+        this.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
     }
 
     /**

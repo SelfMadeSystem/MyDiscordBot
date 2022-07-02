@@ -21,7 +21,7 @@ const command: MenuCommand = {
             .addField('Roles', member.roles.cache.map(r => r.name).join(', '))
             .addField('Bot', member.user.bot ? 'Yes' : 'No')
             .addField('Nickname', member.nickname ?? "None")
-            .setAuthor(`Requested by: ${interaction.user.username}`, interaction.user.avatarURL())
+            .setAuthor({ "name": `Requested by: ${interaction.user.username}`, "iconURL": interaction.user.avatarURL() })
         interaction.reply({
             // content: `${member} ${interaction.targetId}`,
             ephemeral: true,

@@ -5,7 +5,7 @@ import { CommandManager } from './commands/command';
 import localConfig from './localconfig.json';
 
 // Create bot
-const bot = new Bot(localConfig.token);
+const bot = new Bot(localConfig.token, localConfig.publicKey);
 
 // Start bot
 bot.start();

@@ -1,13 +1,17 @@
 import { SlashCommand, Categories, Command, getAllCommands, getCommandsByCategory } from '../command';
 import { CommandInteraction, Message, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, ColorResolvable, InteractionReplyOptions, ButtonInteraction, SelectMenuInteraction } from 'discord.js';
 import { SlashCommandBuilder, SlashCommandStringOption } from '@discordjs/builders';
+import { APIApplicationCommandOptionChoice } from 'discord-api-types/v9';
 
-function genChoices(): [string, string][] {
+function genChoices(): APIApplicationCommandOptionChoice<string>[] {
     const commands = getAllCommands()
 
     return commands.map(c => {
         let name = getCommandName(c)
-        return [name, name]
+        return {
+            name,
+            value: name
+        }
     })
 }
 
@@ -44,7 +48,7 @@ function helpGeneric() {
     const commandListEmbed = new MessageEmbed()
         .setTitle("Command List")
         .setDescription(`Use \`/help [command]\` to get more information about a command.`)
-        .setFooter(`EEE v5`)
+        .setFooter({"text": `EEE v5`})
         .setColor("#fff")
     for (let cat of Categories) {
         const categoryCommands = getCommandsByCategory(cat)
@@ -55,19 +59,19 @@ function helpGeneric() {
     return _helpGeneric = {
         embeds: [commandListEmbed],
         components: [new MessageActionRow()
-        .addComponents(
-            new MessageSelectMenu()
-            .setMinValues(1)
-            .setMaxValues(1)
-            .setPlaceholder("Select a command for help on it.")
-            .setCustomId("help_helpGeneric")
-            .addOptions(commandList.map(c => {
-                return {
-                    label: c,
-                    value: c
-                }
-            }))
-        )],
+            .addComponents(
+                new MessageSelectMenu()
+                    .setMinValues(1)
+                    .setMaxValues(1)
+                    .setPlaceholder("Select a command for help on it.")
+                    .setCustomId("help_helpGeneric")
+                    .addOptions(commandList.map(c => {
+                        return {
+                            label: c,
+                            value: c
+                        }
+                    }))
+            )],
         ephemeral: true,
     }
 }
@@ -88,7 +92,7 @@ const command: SlashCommand & { _discordCommand: any } = {
             const command = getAllCommands().find(c => c.help && c.help.name == cmdName || c.discordCommand.name == cmdName)
             if (command) {
                 const embed = getCommandDescription(command)
-                interaction.reply({ 
+                interaction.reply({
                     ephemeral: true,
                     embeds: [embed]
                 })
@@ -136,7 +140,7 @@ const command: SlashCommand & { _discordCommand: any } = {
                 .setName('command')
                 .setDescription('The command to show help for')
                 .setRequired(false)
-                .addChoices(genChoices())
+                .addChoices(...genChoices())
             )
             .toJSON()
     }

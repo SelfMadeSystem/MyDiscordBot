@@ -29,7 +29,7 @@ const command: SlashCommand = {
                 .addField('Inline field title', 'Some value here', true)
                 .setImage('https://i.imgur.com/AfFp7pu.png')
                 .setTimestamp()
-                .setFooter('Some footer text here', 'https://i.imgur.com/AfFp7pu.png')], */
+                .setFooter({"text": 'Some footer text here', "iconURL": 'https://i.imgur.com/AfFp7pu.png'})], */
             components: [new MessageActionRow()
                 .addComponents(
                     new MessageButton()
@@ -112,9 +112,9 @@ const command: SlashCommand = {
     },
 
     discordCommand: new SlashCommandBuilder()
-    .setName('test')
-    .setDescription('Test command.')
-    .toJSON()
+        .setName('test')
+        .setDescription('Test command.')
+        .toJSON()
 }
 
 export default command;

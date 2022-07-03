@@ -1,7 +1,8 @@
 import { SlashCommand, Categories, Command, getAllCommands, getCommandsByCategory } from '../command';
-import { CommandInteraction, Message, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, ColorResolvable, InteractionReplyOptions, ButtonInteraction, SelectMenuInteraction } from 'discord.js';
+import { CommandInteraction, Message, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, InteractionReplyOptions, ButtonInteraction, SelectMenuInteraction } from 'discord.js';
 import { SlashCommandBuilder, SlashCommandStringOption } from '@discordjs/builders';
 import { APIApplicationCommandOptionChoice } from 'discord-api-types/v9';
+import { randomColor } from '../../utils/utils';
 
 function genChoices(): APIApplicationCommandOptionChoice<string>[] {
     const commands = getAllCommands()
@@ -18,10 +19,6 @@ function genChoices(): APIApplicationCommandOptionChoice<string>[] {
 function getCommandName(command: Command): string {
     if (command.help) return command.help.name
     return command.discordCommand.name
-}
-
-function randomColor(): ColorResolvable {
-    return `#${Math.floor(Math.random() * 16777215).toString(16)}`
 }
 
 function getCommandDescription(command: Command): MessageEmbed {
@@ -48,7 +45,7 @@ function helpGeneric() {
     const commandListEmbed = new MessageEmbed()
         .setTitle("Command List")
         .setDescription(`Use \`/help [command]\` to get more information about a command.`)
-        .setFooter({"text": `EEE v5`})
+        .setFooter({ "text": `EEE v5` })
         .setColor("#fff")
     for (let cat of Categories) {
         const categoryCommands = getCommandsByCategory(cat)

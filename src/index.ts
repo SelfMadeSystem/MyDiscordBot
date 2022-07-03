@@ -6,7 +6,7 @@ import { MessageHandlerManager } from './events/messageHandler';
 import localConfig from './localconfig.json';
 
 // Create bot
-const bot = new Bot(localConfig.token, localConfig.publicKey);
+export const bot = new Bot(localConfig.token, localConfig.publicKey);
 
 // Start bot
 bot.start();

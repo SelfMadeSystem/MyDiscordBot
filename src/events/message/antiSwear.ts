@@ -1,26 +1,40 @@
 import { Handler } from "../messageHandler";
 
 const removeZeroWidth = (str: string) => {
-    return str.replace(/[\u200B-\u200D\uFEFF]/g, "");
+    return str.replace(/\-|_|\./g, "");
 }
 
-/* Example:
-genRegex([
-    ["s","5"],
-    ["h","4"],
-    ["i","1","!","l"],
-    ["t","7"],
-    [["e"], true]
-]) -> /\b(s|5)+\s*(h|4)+\s*(i|1|!|l)+\s*(t|7)+\b/gi
+/* Examples:
+console.log(genRegex([
+    ["c", "("],
+    ["o", "0"],
+    ["c", "(", "k"],
+]).replaceAll("\\", "\\\\"))
 
-genRegex([
-    "f",
-    "u",
-    [["c", "k", "q"], 2]
-]) -> /\b(f)+\s*(u)+\s*(c|k|q){2,}\b/gi
+console.log(genRegex([
+    "p",
+    ["u", "v"],
+    [["s", "5"], 2],
+    "y"
+]).replaceAll("\\", "\\\\"))
+
+console.log(genRegex([
+    "d",
+    ["i", "1", "l", "!"],
+    [["k", "c", "("], 2],
+]).replaceAll("\\", "\\\\"))
+
+console.log(genRegex([
+    "p",
+    ["u", "v"],
+    [["s", "5"], 2],
+    ["i", "1", "l", "!"],
+    ["e", "3"],
+    ["s", "5"],
+]).replaceAll("\\", "\\\\"))
 */
 
-type SingleRegexGen =
+/* type SingleRegexGen =
     string | // One single character to mandatorily match one or more times
     string[] | // Any one of these characters to mandatorily match one or more times
     [string[], // These characters to match...
@@ -34,71 +48,65 @@ function escapeRegExp(text: string) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
 
-function genRegex(gen: RegexGen): RegExp {
-    const inBetween = "(\\s|[\\u200B-\\u200D\\uFEFF])*";
+function genRegex(gen: RegexGen): string {
+    const whitespace = "(\\s|\\-|_|\\.)";
+    const inBetween = `${whitespace}*`;
 
     const regexes = gen.map(g => {
         if (typeof g === "string") {
-            return `${g}+`;
+            return `(${g})+`;
         } else if (Array.isArray(g)) {
             if (Array.isArray(g[0])) {
                 const [words, count] = g;
                 let escaped = words.map(escapeRegExp).join("|");
                 if (typeof count === "number") {
-                    return `(${escaped}){${count},}`;
+                    return `((${escaped})(${inBetween})){${count},}`;
                 }
                 if (typeof count === "boolean") {
-                    return `(${escaped})*`;
+                    return `((${escaped})(${inBetween}))*`;
                 }
                 if (Array.isArray(count)) {
                     const [min, max] = count;
-                    return `(${escaped}){${min},${max}}`;
+                    return `((${escaped})(${inBetween})){${min},${max}}`;
                 }
                 // Go to throw statement since invalid
             } else if (typeof g[0] === "string") { // All of g should be of type string
                 let escaped = g.map(c => escapeRegExp(c as string)).join("|");
-                return `(${escaped})+`;
+                return `((${escaped})(${inBetween}))+`;
             }
         }
         throw new Error("Invalid regex gen");
     });
 
-    return new RegExp(`\\b(${regexes.join(inBetween)})+\\b`, "gi");
-}
+    return `\\b(${regexes.join(inBetween)})+\\b`;
+} */
 // I'd just use this to generate the regex, then I'd just hard code it in encase
 // there's anything that you'd want to customize that's impossible for this
 // thing to generate.
 
-const expressions = [
-    /(?!\b(niger|nigeria)\b)n(i|!|1|l)+(g|6)+(((e|3)*r+)|a+)/i,
-    /(b|6)+(i|!|l|1)+(t|1)+(c)+(h|4)/i,
-    /((l|\b)+(\s|[\u200B-\u200D\uFEFF])*(s|5)+(\s|[\u200B-\u200D\uFEFF])*(h|4)+(\s|[\u200B-\u200D\uFEFF])*(i|1|!|l)+(\s|[\u200B-\u200D\uFEFF])*(t|7)+(\s|[\u200B-\u200D\uFEFF])*(e)*)+\b/gi,
-    /(^|_|-| )(a|4)+(s|5){2,}((3|e)+(s|5)*)?($|_|-| )/i,
-    /(^|_|-| )f+u+(c|k|q)+?($|_|-| )|f+u+(c|q|k){2,}/i,
-    /(c|k)(o|0|u)(c|k)+/i,
-    /p+(u+|V)(s+|5+)+?y+/i,
-    /d(i|1|!)+ck+?|d(i|1|!)+(k|c)/i,
-    /f+(a|4)+(g|6)+/i,
-    /^g+(?:([a4]))+y+/i,
-    /(?:[s5]+)(l+|i+|1+)(u+|v+)t+/i,
-    /(s+|5+)+k+(([a|4]+))n+k+/i
-];
+const expressions: { [key: string]: string } = Object.freeze({
+    "N-Word": "\\b(?!\\b(niger)\\b)((n)+(\\s|\\-|_|\\.)*((i|!|l|1)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((g|9|q)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((e|3)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*(r)+(\\s|\\-|_|\\.|s|5)*)+\\b",
+    "N-Word with a": "\\b((n)+(\\s|\\-|_|\\.)*((i|!|l|1)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((g|9|q)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((a|4)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.|s)*)+\\b",
+    "B-Word": "\\b((b)+(\\s|\\-|_|\\.)*((i|l|1|!)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((t|7)((\\s|\\-|_|\\.)*))*(\\s|\\-|_|\\.)*((c|\\()((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((h|4)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.|e|3|s|5)*)+\\b",
+    "F-Word": "\\b((f)+(\\s|\\-|_|\\.)*((u|v)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((c|k|q)((\\s|\\-|_|\\.)*)){2,}(\\s|\\-|_|\\.|s|5)*)+\\b",
+    "S-Word #1": "\\b(((s|5)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((h|4)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((i|1|!|l)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((t|7)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.|e|3|s|5)*)+\\b",
+    "S-Word #2": "\\b(((s|5)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((l|1)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((u|v)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((t|7)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.|s)*(\\s|\\-|_|\\.|e|3|s|5)*)+\\b",
+    "C-Word": "\\b(((c|\\()((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((o|0)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((c|\\(|k)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.|s|5)*)+\\b",
+    "P-Word": "\\b((p)+(\\s|\\-|_|\\.)*((u|v)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((s|5)((\\s|\\-|_|\\.)*)){2,}(\\s|\\-|_|\\.)*(y)+)+\\b",
+    "P-Word but plural": "\\b((p)+(\\s|\\-|_|\\.)*((u|v)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((s|5)((\\s|\\-|_|\\.)*)){2,}(\\s|\\-|_|\\.)*((i|1|l|!)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((e|3)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((s|5)((\\s|\\-|_|\\.)*))+)+\\b",
+    "D-Word": "\\b((d)+(\\s|\\-|_|\\.)*((i|1|l|!)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((k|c|\\()((\\s|\\-|_|\\.)*)){2,}(\\s|\\-|_|\\.|e|3|s|5)*)+\\b",
+});
 
 const handler: Handler = {
     onMessage: (message) => {
         const content = removeZeroWidth(message.content);
-        for (const expression of expressions) {
-            if (expression.test(content)) {
+        for (const key in expressions) {
+            const expression = expressions[key];
+            const regex = new RegExp(expression, "gi");
+            if (regex.test(content)) {
                 message.delete();
-                message.channel.send("Please don't use profanity.");
-                return;
-            }
-        }
-        const contentWithoutSpaces = content.replace(/\s|\n/g, "");
-        for (const expression of expressions) {
-            if (expression.test(contentWithoutSpaces)) {
-                message.delete();
-                message.channel.send("Please don't use profanity.");
+                message.channel.send(`${message.author.username}'s message got deleted for saying ${key}.`);
+                console.log(`${message.author.username}'s message got deleted for saying ${key}: ${message.content}`);
                 return;
             }
         }

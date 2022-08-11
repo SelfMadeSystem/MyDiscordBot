@@ -1,5 +1,5 @@
 import { SlashCommand, Categories, Command, getAllCommands, getCommandsByCategory } from '../command';
-import { InteractionReplyOptions, ButtonInteraction, SelectMenuInteraction, EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, ChatInputCommandInteraction, CacheType } from 'discord.js';
+import { InteractionReplyOptions, ButtonInteraction, SelectMenuInteraction, EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, ChatInputCommandInteraction, CacheType, ModalSubmitInteraction } from 'discord.js';
 import { SlashCommandBuilder, SlashCommandStringOption } from '@discordjs/builders';
 import { APIApplicationCommandOptionChoice } from 'discord-api-types/v9';
 import { randomColor } from '../../utils/utils';
@@ -102,7 +102,7 @@ const command: SlashCommand & { _discordCommand: any } = {
         }
     },
 
-    interact: async (interaction: ButtonInteraction | SelectMenuInteraction) => {
+    interact: async (interaction: ButtonInteraction | SelectMenuInteraction | ModalSubmitInteraction) => {
         switch (interaction.customId) {
             case "help_helpGeneric":
                 const cmdName = (interaction as SelectMenuInteraction).values[0]

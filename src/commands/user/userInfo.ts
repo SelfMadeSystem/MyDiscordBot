@@ -1,5 +1,5 @@
 import { UserMenuCommand } from '../command';
-import { EmbedBuilder, UserContextMenuCommandInteraction } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { bot } from '../..';
 
 const command: UserMenuCommand = {

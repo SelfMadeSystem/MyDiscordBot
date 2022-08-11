@@ -1,5 +1,5 @@
 import { SlashCommand } from '../command';
-import { type CacheType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { randomColor } from '../../utils/utils';
 import { bot } from '../..';
@@ -7,7 +7,7 @@ import { bot } from '../..';
 const command: SlashCommand = {
     commandCategory: 'misc',
 
-    slashCommand(interaction: ChatInputCommandInteraction<CacheType>): void {
+    slashCommand(interaction): void {
         interaction.reply({
             embeds: [
                 new EmbedBuilder()

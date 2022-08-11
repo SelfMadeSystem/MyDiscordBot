@@ -1,6 +1,5 @@
 import { Bot } from '../bot';
-import { ButtonInteraction, CacheType, ChatInputCommandInteraction, CommandInteraction, ContextMenuCommandInteraction, Interaction, MessageContextMenuCommandInteraction, SelectMenuInteraction, Snowflake, UserContextMenuCommandInteraction } from 'discord.js';
-import { SlashCommandBuilder } from '@discordjs/builders';
+import { ButtonInteraction, CacheType, ChatInputCommandInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, ModalSubmitInteraction, SelectMenuInteraction, UserContextMenuCommandInteraction } from 'discord.js';
 import path from 'path';
 import fs from 'fs';
 
@@ -111,7 +110,7 @@ export class CommandManager {
      * @param id The id of the interaction.
      * @param interaction The interaction to execute.
      */
-    public interact(id: string, interaction: ButtonInteraction | SelectMenuInteraction) {
+    public interact(id: string, interaction: ButtonInteraction | SelectMenuInteraction | ModalSubmitInteraction) {
         // Get the command.
         const command = this.commands.find(
             (c) => c.interactionIds?.includes(id)
@@ -145,7 +144,7 @@ export class CommandManager {
                 const { commandName } = interaction;
 
                 this.messageMenu(commandName, interaction);
-            } else if (interaction.isButton() || interaction.isSelectMenu()) {
+            } else if (interaction.isButton() || interaction.isSelectMenu() || interaction.isModalSubmit()) {
                 const { customId } = interaction;
 
                 this.interact(customId, interaction);
@@ -183,7 +182,7 @@ export interface Command {
     // The function to execute when the message menu command is executed.
     messageMenuCommand?: (interaction: ContextMenuCommandInteraction<CacheType>) => void;
     // The function to execute when the command is interacted with.
-    interact?: (interaction: ButtonInteraction | SelectMenuInteraction) => void;
+    interact?: (interaction: ButtonInteraction | SelectMenuInteraction | ModalSubmitInteraction) => void;
 }
 
 // Used for slash commands.

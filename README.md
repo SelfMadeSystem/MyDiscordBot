@@ -15,7 +15,8 @@ Before starting the bot, make a `localconfig.json` file in the src directory wit
 {
     "token": "YOUR_TOKEN_HERE",
     "guildId": "YOUR_GUILD_ID_HERE",
-    "clientId": "BOT_ID_HERE"
+    "clientId": "BOT_ID_HERE",
+    "publicKey": "YOUR_PUBLIC_KEY_HERE",
 }
 ```
 Run `npm run depcmd` to deploy the bot's commands to the server.

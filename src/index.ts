@@ -1,6 +1,7 @@
 import { Bot } from './bot';
 import { CommandManager } from './commands/command';
 import { MessageHandlerManager } from './events/messageHandler';
+import { ReactionRoleManager } from './events/reactionRoles';
 
 // Import the local config. Must contain the token.
 import localConfig from './localconfig.json';
@@ -28,6 +29,9 @@ export async function waitForBotStart() {
 
   // Create message handler (for antiswear and other administrative stuff)
   new MessageHandlerManager(bot);
+
+  // Create reaction role manager
+  new ReactionRoleManager(bot);
 
   botStarted = true;
   startingCBs.forEach(cb => cb(null));

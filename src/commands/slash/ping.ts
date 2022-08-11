@@ -1,19 +1,24 @@
 import { SlashCommand } from '../command';
-import { CommandInteraction, Message, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu } from 'discord.js';
+import { type CacheType, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { randomColor } from '../../utils/utils';
+import { bot } from '../..';
 
 const command: SlashCommand = {
     commandCategory: 'misc',
 
-    slashCommand(interaction: CommandInteraction): void {
+    slashCommand(interaction: ChatInputCommandInteraction<CacheType>): void {
         interaction.reply({
             embeds: [
-                new MessageEmbed()
+                new EmbedBuilder()
                     .setTitle('Pong!')
                     .setDescription(`${interaction.member.user.username} pong!`)
-                    .addField('Ping', `${Date.now() - interaction.createdTimestamp}ms`)
-                    .setColor(randomColor()),
+                    .addFields({
+                        name: 'Ping',
+                        value: `${Date.now() - interaction.createdTimestamp}ms`
+                    })
+                    .setColor(randomColor())
+                    .setFooter(bot.footer),
             ]
         })
     },

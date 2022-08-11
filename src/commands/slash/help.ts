@@ -1,8 +1,9 @@
 import { SlashCommand, Categories, Command, getAllCommands, getCommandsByCategory } from '../command';
-import { CommandInteraction, Message, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, InteractionReplyOptions, ButtonInteraction, SelectMenuInteraction } from 'discord.js';
+import { InteractionReplyOptions, ButtonInteraction, SelectMenuInteraction, EmbedBuilder, ActionRowBuilder, SelectMenuBuilder, ChatInputCommandInteraction, CacheType } from 'discord.js';
 import { SlashCommandBuilder, SlashCommandStringOption } from '@discordjs/builders';
 import { APIApplicationCommandOptionChoice } from 'discord-api-types/v9';
 import { randomColor } from '../../utils/utils';
+import { bot } from '../..';
 
 function genChoices(): APIApplicationCommandOptionChoice<string>[] {
     const commands = getAllCommands()
@@ -21,14 +22,14 @@ function getCommandName(command: Command): string {
     return command.discordCommand.name
 }
 
-function getCommandDescription(command: Command): MessageEmbed {
-    const embed = new MessageEmbed()
+function getCommandDescription(command: Command): EmbedBuilder {
+    const embed = new EmbedBuilder()
         .setColor(randomColor())
     if (command.help) {
         embed.setTitle(command.help.name)
         embed.setDescription(command.help.description)
-        if (command.help.usage) embed.setFooter(command.help.usage)
-        if (command.help.examples) embed.addField('Examples', command.help.examples.join('\n'))
+        if (command.help.usage) embed.setFooter({ text: command.help.usage })
+        if (command.help.examples) embed.addFields({ name: 'Examples', value: command.help.examples.join('\n') })
     } else {
         embed.setTitle(command.discordCommand.name)
         embed.setDescription(command.discordCommand.description)
@@ -42,22 +43,22 @@ function helpGeneric() {
     if (_helpGeneric) return _helpGeneric;
     const commands = getAllCommands()
     const commandList = commands.map(c => getCommandName(c))
-    const commandListEmbed = new MessageEmbed()
+    const commandListEmbed = new EmbedBuilder()
         .setTitle("Command List")
         .setDescription(`Use \`/help [command]\` to get more information about a command.`)
-        .setFooter({ "text": `EEE v5` })
         .setColor("#fff")
+        .setFooter(bot.footer)
     for (let cat of Categories) {
         const categoryCommands = getCommandsByCategory(cat)
         if (categoryCommands.length === 0) continue
         const categoryCommandList = categoryCommands.map(c => getCommandName(c))
-        commandListEmbed.addField(cat.charAt(0).toUpperCase() + cat.slice(1), categoryCommandList.join('\n'))
+        commandListEmbed.addFields({ name: cat.charAt(0).toUpperCase() + cat.slice(1), value: categoryCommandList.join('\n'), inline: true })
     }
     return _helpGeneric = {
         embeds: [commandListEmbed],
-        components: [new MessageActionRow()
+        components: [new ActionRowBuilder<SelectMenuBuilder>()
             .addComponents(
-                new MessageSelectMenu()
+                new SelectMenuBuilder()
                     .setMinValues(1)
                     .setMaxValues(1)
                     .setPlaceholder("Select a command for help on it.")
@@ -83,7 +84,7 @@ const command: SlashCommand & { _discordCommand: any } = {
     },
     interactionIds: ['help_helpGeneric'],
 
-    slashCommand: async (interaction: CommandInteraction) => {
+    slashCommand: async (interaction: ChatInputCommandInteraction<CacheType>) => {
         const cmdName = interaction.options.getString("command");
         if (cmdName) {
             const command = getAllCommands().find(c => c.help && c.help.name == cmdName || c.discordCommand.name == cmdName)

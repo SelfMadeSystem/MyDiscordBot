@@ -1,23 +1,38 @@
-import { REST } from '@discordjs/rest';
 import { Snowflake } from 'discord-api-types/v9';
-import { TextChannel, Client, Intents, Message, MessagePayload } from 'discord.js';
+import { Client, EmbedFooterData, GatewayIntentBits, Partials } from 'discord.js';
 
 /*
  * Bot class
  */
 export class Bot {
-    private readonly client: Client;
+    public readonly client: Client;
+    public get name(): string {
+        return this.client.user.username;
+    }
+    public get id(): Snowflake {
+        return this.client.user.id;
+    }
+    public readonly version = '0.0.1'; // Bot version
+    public get footer(): EmbedFooterData {
+        return {
+            text: `Version ${this.version}`,
+            iconURL: this.client.user.avatarURL(),
+        };
+    }
     private clientID: Snowflake;
 
     /**
      * Constructor. Initializes the bot with the given token.
      * 
      * @param token Discord token
-     * @param publicKey Public key for the bot to verify interactions
+     * @param publicKey Public key for the bot to verify interactions TODO: implement
      */
     constructor(private readonly token: Snowflake,
         private readonly publicKey: string) {
-        this.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+        this.client = new Client({
+            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.MessageContent],
+            partials: [Partials.Message, Partials.Channel, Partials.Reaction],
+        });
     }
 
     /**
@@ -43,17 +58,5 @@ export class Bot {
     public stop() {
         this.client.user.setStatus('invisible'); // Set status
         this.client.destroy(); // Destroy client
-    }
-
-    public getClient() {
-        return this.client;
-    }
-
-    public getClientID() {
-        return this.clientID;
-    }
-
-    public getToken() {
-        return this.token;
     }
 }

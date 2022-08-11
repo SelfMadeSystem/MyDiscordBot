@@ -1,5 +1,5 @@
 import { Bot } from '../bot';
-import { ButtonInteraction, CommandInteraction, ContextMenuInteraction, SelectMenuInteraction, Snowflake } from 'discord.js';
+import { ButtonInteraction, CacheType, ChatInputCommandInteraction, CommandInteraction, ContextMenuCommandInteraction, Interaction, MessageContextMenuCommandInteraction, SelectMenuInteraction, Snowflake, UserContextMenuCommandInteraction } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import path from 'path';
 import fs from 'fs';
@@ -17,13 +17,16 @@ export class CommandManager {
     private commands: Command[] = [];
     // List of only slash commands.
     private slashCommands: Command[] = [];
-    // List of only menu commands.
-    private menuCommands: Command[] = [];
+    // List of only user menu commands.
+    private userMenuCommands: Command[] = [];
+    // List of only message menu commands.
+    private messageMenuCommands: Command[] = [];
 
     constructor(private bot: Bot) {
         this.slashCommands = getCommands("slash"); // Get all slash commands.
-        this.menuCommands = getCommands("menu"); // Get all menu commands.
-        this.commands = [...this.slashCommands, ...this.menuCommands]; // Combine both lists.
+        this.userMenuCommands = getCommands("user"); // Get all user menu commands.
+        this.messageMenuCommands = getCommands("message"); // Get all message menu commands.
+        this.commands = [...this.slashCommands, ...this.userMenuCommands, ...this.messageMenuCommands]; // Combine all commands.
         this.hook(); // Hook the interaction events.
     }
 
@@ -33,7 +36,7 @@ export class CommandManager {
      * @param command The command to execute.
      * @param interaction The interaction to execute the command on.
      */
-    public slash(command: string, interaction: CommandInteraction): void {
+    public slash(command: string, interaction: ChatInputCommandInteraction<CacheType>): void {
         // Get the command.
         const commandToExecute = this.slashCommands.find(
             (c) => c.discordCommand.name === command
@@ -53,20 +56,45 @@ export class CommandManager {
     }
 
     /**
-     * Executes a menu command.
+     * Executes a user menu command.
      * 
      * @param command The command to execute.
      * @param interaction The interaction to execute the command on.
      */
-    public menu(command: string, interaction: ContextMenuInteraction): void {
+    public userMenu(command: string, interaction: UserContextMenuCommandInteraction<CacheType>): void {
         // Get the command.
-        const commandToExecute = this.menuCommands.find(
+        const commandToExecute = this.userMenuCommands.find(
             (c) => c.discordCommand.name === command
         );
 
         if (commandToExecute) {
             // Execute the command if it exists.
-            commandToExecute?.menuCommand(interaction);
+            commandToExecute.userMenuCommand(interaction);
+        } else {
+            // Otherwise, send a message to the user and log the error.
+            interaction.reply({
+                content: `I'm sorry. Command ${command} not found.`,
+                ephemeral: true,
+            });
+            console.warn(`Menu command ${command} not found`);
+        }
+    }
+
+    /**
+     * Executes a message menu command.
+     * 
+     * @param command The command to execute.
+     * @param interaction The interaction to execute the command on.
+     */
+    public messageMenu(command: string, interaction: MessageContextMenuCommandInteraction<CacheType>): void {
+        // Get the command.
+        const commandToExecute = this.messageMenuCommands.find(
+            (c) => c.discordCommand.name === command
+        );
+
+        if (commandToExecute) {
+            // Execute the command if it exists.
+            commandToExecute.messageMenuCommand(interaction);
         } else {
             // Otherwise, send a message to the user and log the error.
             interaction.reply({
@@ -103,15 +131,20 @@ export class CommandManager {
     }
 
     private hook() {
-        this.bot.getClient().on('interactionCreate', async interaction => {
-            if (interaction.isCommand()) {
+        this.bot.client.on('interactionCreate', async interaction => {
+            if (interaction.isChatInputCommand()) {
                 const { commandName } = interaction;
 
                 this.slash(commandName, interaction);
-            } else if (interaction.isContextMenu()) {
+            } else if (interaction.isUserContextMenuCommand()) {
                 const { commandName } = interaction;
 
-                this.menu(commandName, interaction);
+                this.userMenu(commandName, interaction);
+            
+            } else if (interaction.isMessageContextMenuCommand()) {
+                const { commandName } = interaction;
+
+                this.messageMenu(commandName, interaction);
             } else if (interaction.isButton() || interaction.isSelectMenu()) {
                 const { customId } = interaction;
 
@@ -143,35 +176,48 @@ export interface Command {
     commandCategory: CommandCategory;
     // Optional list of interaction ids (for buttons, select menus, etc).
     interactionIds?: string[];
-    // The function to execute when the command is executed.
-    slashCommand?: (interaction: CommandInteraction) => void;
-    // The function to execute when the command is executed.
-    menuCommand?: (interaction: ContextMenuInteraction) => void;
+    // The function to execute when the slash command is executed.
+    slashCommand?: (interaction: ChatInputCommandInteraction<CacheType>) => void;
+    // The function to execute when the user menu command is executed.
+    userMenuCommand?: (interaction: ContextMenuCommandInteraction<CacheType>) => void;
+    // The function to execute when the message menu command is executed.
+    messageMenuCommand?: (interaction: ContextMenuCommandInteraction<CacheType>) => void;
     // The function to execute when the command is interacted with.
     interact?: (interaction: ButtonInteraction | SelectMenuInteraction) => void;
 }
 
 // Used for slash commands.
 export interface SlashCommand extends Command {
-    slashCommand: (interaction: CommandInteraction) => void;
+    slashCommand: (interaction: ChatInputCommandInteraction<CacheType>) => void;
 }
 
-// Used for menu commands.
-export interface MenuCommand extends Command {
+// Used for user menu commands.
+export interface UserMenuCommand extends Command {
     help: {
         name: string;
         description: string;
         usage?: string;
         examples?: string[];
     };
-    menuCommand: (interaction: ContextMenuInteraction) => void;
+    userMenuCommand: (interaction: ContextMenuCommandInteraction<CacheType>) => void;
+}
+
+// Used for message menu commands.
+export interface MessageMenuCommand extends Command {
+    help: {
+        name: string;
+        description: string;
+        usage?: string;
+        examples?: string[];
+    };
+    messageMenuCommand: (interaction: ContextMenuCommandInteraction<CacheType>) => void;
 }
 
 export function getDiscordCommands(): any[] {
     return getAllCommands().map(c => c.discordCommand);
 }
 
-const commands = getCommands("slash").concat(getCommands("menu"));
+const commands = getCommands("slash").concat(getCommands("user")).concat(getCommands("message"));
 
 export function getCommandsByCategory(category: CommandCategory): Command[] {
     return commands.filter(c => c.commandCategory === category);
@@ -181,7 +227,7 @@ export function getAllCommands(): Command[] {
     return commands;
 }
 
-export function getCommands(dir: "slash" | "menu"): Command[] {
+export function getCommands(dir: "slash" | "user" | "message"): Command[] {
     const files = fs.readdirSync(path.join(__dirname, `./${dir}`));
     const commands = files.map(file => {
         return require(`./${dir}/${file}`).default;

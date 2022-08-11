@@ -7,7 +7,7 @@ export class MessageHandlerManager {
     private messageHandlers: Handler[] = [];
     private botMessageHandlers: Handler[] = [];
     constructor(private bot: Bot) {
-        bot.getClient().on('messageCreate', this.onMessage.bind(this));
+        bot.client.on('messageCreate', this.onMessage.bind(this));
         this.messageHandlers = getHandlers();
         this.botMessageHandlers = this.messageHandlers.filter(h => h.handlesBots === true);
     }

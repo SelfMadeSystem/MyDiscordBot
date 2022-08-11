@@ -1,6 +1,6 @@
 import { SlashCommand } from '../command';
-import { CommandInteraction, Message, MessageEmbed, MessageActionRow, MessageButton, MessageSelectMenu, ButtonInteraction, SelectMenuInteraction } from 'discord.js';
-import { SlashCommandBuilder, SlashCommandBooleanOption } from '@discordjs/builders';
+import { ChatInputCommandInteraction, ButtonInteraction, SelectMenuInteraction, ActionRowBuilder, ButtonBuilder, SelectMenuBuilder, CacheType } from 'discord.js';
+import { SlashCommandBuilder } from '@discordjs/builders';
 
 export const name = 'test';
 
@@ -9,44 +9,44 @@ const command: SlashCommand = {
 
     commandCategory: 'misc',
 
-    slashCommand(interaction: CommandInteraction): void {
+    slashCommand(interaction: ChatInputCommandInteraction<CacheType>): void {
         interaction.reply({
             content: "hi",
             ephemeral: true,
-            /* embeds: [new MessageEmbed()
-                .setColor('#0099ff')
-                .setTitle('Some title')
-                .setURL('https://discord.js.org/')
-                .setAuthor('Some name', 'https://i.imgur.com/AfFp7pu.png', 'https://discord.js.org')
-                .setDescription('Some description here')
-                .setThumbnail('https://i.imgur.com/AfFp7pu.png')
-                .addFields(
-                    { name: 'Regular field title', value: 'Some value here' },
-                    { name: '\u200B', value: '\u200B' },
-                    { name: 'Inline field title', value: 'Some value here', inline: true },
-                    { name: 'Inline field title', value: 'Some value here', inline: true },
-                )
-                .addField('Inline field title', 'Some value here', true)
-                .setImage('https://i.imgur.com/AfFp7pu.png')
-                .setTimestamp()
-                .setFooter({"text": 'Some footer text here', "iconURL": 'https://i.imgur.com/AfFp7pu.png'})], */
-            components: [new MessageActionRow()
+            // embeds: [new EmbedBuilder()
+            //     .setColor(0x0099FF)
+            //     .setTitle('Some title')
+            //     .setURL('https://discord.js.org/')
+            //     .setAuthor({ name: 'Some name', iconURL: 'https://i.imgur.com/AfFp7pu.png', url: 'https://discord.js.org' })
+            //     .setDescription('Some description here')
+            //     .setThumbnail('https://i.imgur.com/AfFp7pu.png')
+            //     .addFields(
+            //         { name: 'Regular field title', value: 'Some value here' },
+            //         { name: '\u200B', value: '\u200B' },
+            //         { name: 'Inline field title', value: 'Some value here', inline: true },
+            //         { name: 'Inline field title', value: 'Some value here', inline: true },
+            //     )
+            //     .addFields({ name: 'Inline field title', value: 'Some value here', inline: true })
+            //     .setImage('https://i.imgur.com/AfFp7pu.png')
+            //     .setTimestamp()
+            //     .setFooter(bot.footer)],
+            components: [new ActionRowBuilder<ButtonBuilder>()
                 .addComponents(
-                    new MessageButton()
+                    new ButtonBuilder()
                         .setCustomId('server_primary')
                         .setLabel('Primary')
-                        .setStyle('PRIMARY'),
+                        .setStyle(1),
                 ),
-            new MessageActionRow()
+            new ActionRowBuilder<ButtonBuilder>()
                 .addComponents(
-                    new MessageButton()
+                    new ButtonBuilder()
                         .setCustomId('server_secondary')
                         .setLabel('Secondary')
-                        .setStyle('SECONDARY'),
+                        .setStyle(2),
                 ),
-            new MessageActionRow()
+            new ActionRowBuilder<SelectMenuBuilder>()
                 .addComponents(
-                    new MessageSelectMenu()
+                    new SelectMenuBuilder()
                         .setCustomId('server_tertiary')
                         .setMinValues(1)
                         .setMaxValues(3)

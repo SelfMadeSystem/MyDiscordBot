@@ -5,22 +5,43 @@ import { MessageHandlerManager } from './events/messageHandler';
 // Import the local config. Must contain the token.
 import localConfig from './localconfig.json';
 
+console.log('Starting bot...');
+
 // Create bot
 export const bot = new Bot(localConfig.token, localConfig.publicKey);
 
-// Start bot
-bot.start();
+let botStarted = false;
 
-// Create command manager
-new CommandManager(bot);
+const startingCBs: ((a: unknown) => void)[] = [];
 
-// Create message handler (for antiswear and other administrative stuff)
-new MessageHandlerManager(bot);
+export async function waitForBotStart() {
+  if (botStarted) return;
+  await new Promise(resolve => startingCBs.push(resolve));
+}
 
-process.on('SIGINT', function () {
+(async () => {
+  // Start bot
+  await bot.start();
+
+  // Create command manager
+  new CommandManager(bot);
+
+  // Create message handler (for antiswear and other administrative stuff)
+  new MessageHandlerManager(bot);
+
+  botStarted = true;
+  startingCBs.forEach(cb => cb(null));
+})();
+
+process.on('SIGINT', async function () {
   console.warn('SIGINT signal received.');
-  console.log("Shutting down bot.");
 
+  if (!botStarted) {
+    console.log("Bot not started. Waiting for it to start for clean shutdown...");
+    await waitForBotStart();
+  }
+
+  console.log("Shutting down bot.");
   bot.stop();
 
   process.exit();

@@ -1,7 +1,5 @@
 import { Message, MessageReaction, PartialMessageReaction, PartialUser, User } from "discord.js";
 import { Bot } from "../bot";
-import path from 'path';
-import fs from 'fs';
 
 export interface ReactionRole {
     emoji: string;

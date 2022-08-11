@@ -192,23 +192,11 @@ export interface SlashCommand extends Command {
 
 // Used for user menu commands.
 export interface UserMenuCommand extends Command {
-    help: {
-        name: string;
-        description: string;
-        usage?: string;
-        examples?: string[];
-    };
     userMenuCommand: (interaction: ContextMenuCommandInteraction<CacheType>) => void;
 }
 
 // Used for message menu commands.
 export interface MessageMenuCommand extends Command {
-    help: {
-        name: string;
-        description: string;
-        usage?: string;
-        examples?: string[];
-    };
     messageMenuCommand: (interaction: ContextMenuCommandInteraction<CacheType>) => void;
 }
 

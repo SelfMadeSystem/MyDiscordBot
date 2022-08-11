@@ -1,9 +1,9 @@
 import { REST } from '@discordjs/rest';
-import { Routes } from 'discord-api-types/v9';
+import { Routes } from 'discord-api-types/v10';
 import { clientId, guildId, token } from '../localconfig.json';
 import { getDiscordCommands } from './command';
 
-const rest = new REST({ version: '9' }).setToken(token);
+const rest = new REST({ version: '10' }).setToken(token);
 
 // Finds all commands and adds them to the bot.
 // Replace "applicationGuildCommands" with "applicationCommands" if using in production

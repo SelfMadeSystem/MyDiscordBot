@@ -113,7 +113,7 @@ export class CommandManager {
     public interact(id: string, interaction: ButtonInteraction | SelectMenuInteraction | ModalSubmitInteraction) {
         // Get the command.
         const command = this.commands.find(
-            (c) => c.interactionIds?.includes(id)
+            (c) => c.interactionIds?.includes(id) || c.interactionIdTest?.(id)
         );
 
         if (command) {
@@ -139,7 +139,7 @@ export class CommandManager {
                 const { commandName } = interaction;
 
                 this.userMenu(commandName, interaction);
-            
+
             } else if (interaction.isMessageContextMenuCommand()) {
                 const { commandName } = interaction;
 
@@ -175,6 +175,8 @@ export interface Command {
     commandCategory: CommandCategory;
     // Optional list of interaction ids (for buttons, select menus, etc).
     interactionIds?: string[];
+    // Optional function to test if an interaction id is valid.
+    interactionIdTest?: (id: string) => boolean;
     // The function to execute when the slash command is executed.
     slashCommand?: (interaction: ChatInputCommandInteraction<CacheType>) => void;
     // The function to execute when the user menu command is executed.

@@ -1,18 +1,16 @@
 import { SlashCommand } from '../command';
-import { ActionRowBuilder, ButtonBuilder, SelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, SelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder, InteractionReplyOptions } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { bot } from '../..';
 
 export const name = 'test';
 
-const command: SlashCommand = {
-    interactionIds: ['server_primary', 'server_secondary', 'server_tertiary', 'test_modal'],
-
+const bunchOfStuff: SlashCommand = {
     commandCategory: 'misc',
 
     slashCommand(interaction) {
         const modal = new ModalBuilder()
-            .setCustomId('test_modal')
+            .setCustomId('test:modal')
             .setTitle('My Modal');
 
         // Add components to modal
@@ -80,21 +78,21 @@ const command: SlashCommand = {
                 components: [new ActionRowBuilder<ButtonBuilder>()
                     .addComponents(
                         new ButtonBuilder()
-                            .setCustomId('server_primary')
+                            .setCustomId('test:primary')
                             .setLabel('Primary')
                             .setStyle(1),
                     ),
                 new ActionRowBuilder<ButtonBuilder>()
                     .addComponents(
                         new ButtonBuilder()
-                            .setCustomId('server_secondary')
+                            .setCustomId('test:secondary')
                             .setLabel('Secondary')
                             .setStyle(2),
                     ),
                 new ActionRowBuilder<SelectMenuBuilder>()
                     .addComponents(
                         new SelectMenuBuilder()
-                            .setCustomId('server_tertiary')
+                            .setCustomId('test:tertiary')
                             .setMinValues(1)
                             .setMaxValues(3)
                             .setPlaceholder('Select an option')
@@ -150,4 +148,153 @@ const command: SlashCommand = {
         .toJSON()
 }
 
-export default command;
+const paginationPage1: InteractionReplyOptions = {
+    content: "Page 1",
+    components: [new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('test:page2')
+                .setLabel('Page 2')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page3')
+                .setLabel('Page 3')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page4')
+                .setLabel('Page 4')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page2:next') // add the `:prev` to avoid duplicate custom ids
+                .setLabel('Next')
+                .setStyle(1),
+        )],
+    ephemeral: true
+};
+
+const paginationPage2: InteractionReplyOptions = {
+    content: "Page 2",
+    components: [new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('test:page1')
+                .setLabel('Page 1')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page3')
+                .setLabel('Page 3')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page4')
+                .setLabel('Page 4')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page1:prev')
+                .setLabel('Previous')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page3:next')
+                .setLabel('Next')
+                .setStyle(1),
+        )],
+    ephemeral: true
+};
+
+const paginationPage3: InteractionReplyOptions = {
+    content: "Page 3",
+    components: [new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('test:page1')
+                .setLabel('Page 1')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page2')
+                .setLabel('Page 2')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page4')
+                .setLabel('Page 4')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page2:prev')
+                .setLabel('Previous')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page4:next')
+                .setLabel('Next')
+                .setStyle(1),
+        )],
+    ephemeral: true
+};
+
+const paginationPage4: InteractionReplyOptions = {
+    content: "Page 4",
+    components: [new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('test:page1')
+                .setLabel('Page 1')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page2')
+                .setLabel('Page 2')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page3')
+                .setLabel('Page 3')
+                .setStyle(1),
+            new ButtonBuilder()
+                .setCustomId('test:page3:prev')
+                .setLabel('Previous')
+                .setStyle(1),
+        )],
+    ephemeral: true
+};
+
+const paginationPages = new Map<string, InteractionReplyOptions>();
+paginationPages.set('page1', paginationPage1);
+paginationPages.set('page2', paginationPage2);
+paginationPages.set('page3', paginationPage3);
+paginationPages.set('page4', paginationPage4);
+
+const paginationTest: SlashCommand = {
+    commandCategory: "misc",
+    help: {
+        name: "Test",
+        description: "Description for the test command.",
+        usage: "/test <page>",
+        examples: [
+            "/test",
+            "/test 2",
+        ]
+    },
+
+    discordCommand: new SlashCommandBuilder()
+        .setName('test')
+        .setDescription('Test command.')
+        .addIntegerOption(option =>
+            option.setName('page')
+                .setDescription('The page to go to.')
+                .setRequired(false))
+        .toJSON(),
+    
+    slashCommand(interaction) {
+        const page = interaction.options.getInteger('page') || 1;
+        const pageKey = `page${page}`;
+        if (paginationPages.has(pageKey)) {
+            interaction.reply(paginationPages.get(pageKey));
+        } else {
+            interaction.reply({ content: `Page ${page} does not exist.`, ephemeral: true });
+        }
+    },
+
+    interact(interaction) {
+        const customId = interaction.customId.split(':')[1];
+        if (paginationPages.has(customId)) {
+            interaction.reply(paginationPages.get(customId));
+        }
+    },
+}
+
+export default paginationTest;

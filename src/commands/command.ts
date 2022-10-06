@@ -111,10 +111,11 @@ export class CommandManager {
      * @param interaction The interaction to execute.
      */
     public interact(id: string, interaction: ButtonInteraction | SelectMenuInteraction | ModalSubmitInteraction) {
+        // Split the id into by ":" to get the command name.
+        const [commandName] = id.split(":");
+
         // Get the command.
-        const command = this.commands.find(
-            (c) => c.interactionIds?.includes(id) || c.interactionIdTest?.(id)
-        );
+        const command = this.commands.find(c => c.discordCommand.name === commandName);
 
         if (command) {
             // Execute the command if it exists.
@@ -122,7 +123,7 @@ export class CommandManager {
         } else {
             // Otherwise, send a message to the user and log the error.
             interaction.reply({
-                content: `I'm sorry. Interaction ${command} not found.`,
+                content: `I'm sorry. Interaction ${commandName} not found.`,
                 ephemeral: true,
             });
             console.warn(`Interaction ${id} not found`);
@@ -173,10 +174,6 @@ export interface Command {
     };
     // The category of the command.
     commandCategory: CommandCategory;
-    // Optional list of interaction ids (for buttons, select menus, etc).
-    interactionIds?: string[];
-    // Optional function to test if an interaction id is valid.
-    interactionIdTest?: (id: string) => boolean;
     // The function to execute when the slash command is executed.
     slashCommand?: (interaction: ChatInputCommandInteraction<CacheType>) => void;
     // The function to execute when the user menu command is executed.

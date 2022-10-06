@@ -64,8 +64,6 @@ function generateVerifyMath() {
 const verifies: Map<string, VerifyMath> = new Map();
 
 const command: SlashCommand = {
-    interactionIdTest: (id: string) => id.startsWith('verify'),
-
     commandCategory: 'moderation',
 
     slashCommand(interaction) {
@@ -83,7 +81,7 @@ const command: SlashCommand = {
         verifies.set(verifyMath.hash, verifyMath);
 
         interaction.showModal(new ModalBuilder()
-            .setCustomId(`verify-${verifyMath.hash}`)
+            .setCustomId(`verify:${verifyMath.hash}`)
             .setTitle('Verify')
             .addComponents(new ActionRowBuilder<TextInputBuilder>()
                 .addComponents(new TextInputBuilder()

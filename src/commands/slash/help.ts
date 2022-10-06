@@ -62,7 +62,7 @@ function helpGeneric() {
                     .setMinValues(1)
                     .setMaxValues(1)
                     .setPlaceholder("Select a command for help on it.")
-                    .setCustomId("help_helpGeneric")
+                    .setCustomId("help:generic")
                     .addOptions(commandList.map(c => {
                         return {
                             label: c,
@@ -82,7 +82,6 @@ const command: SlashCommand & { _discordCommand: any } = {
         usage: 'help [command]',
         examples: ['/help', '/help ping']
     },
-    interactionIds: ['help_helpGeneric'],
 
     slashCommand: async (interaction: ChatInputCommandInteraction<CacheType>) => {
         const cmdName = interaction.options.getString("command");
@@ -104,7 +103,7 @@ const command: SlashCommand & { _discordCommand: any } = {
 
     interact: async (interaction: ButtonInteraction | SelectMenuInteraction | ModalSubmitInteraction) => {
         switch (interaction.customId) {
-            case "help_helpGeneric":
+            case "help:generic":
                 const cmdName = (interaction as SelectMenuInteraction).values[0]
                 if (cmdName) {
                     const command = getAllCommands().find(c => c.help && c.help.name == cmdName || c.discordCommand.name == cmdName)

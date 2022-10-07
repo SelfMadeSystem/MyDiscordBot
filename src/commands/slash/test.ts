@@ -148,6 +148,9 @@ const bunchOfStuff: SlashCommand = {
         .toJSON()
 }
 
+const ephemeral: { ephemeral?: boolean } = {
+};
+
 const paginationPage1: InteractionReplyOptions = {
     content: "Page 1",
     components: [new ActionRowBuilder<ButtonBuilder>()
@@ -169,7 +172,7 @@ const paginationPage1: InteractionReplyOptions = {
                 .setLabel('Next')
                 .setStyle(1),
         )],
-    ephemeral: true
+    ...ephemeral
 };
 
 const paginationPage2: InteractionReplyOptions = {
@@ -197,7 +200,7 @@ const paginationPage2: InteractionReplyOptions = {
                 .setLabel('Next')
                 .setStyle(1),
         )],
-    ephemeral: true
+    ...ephemeral
 };
 
 const paginationPage3: InteractionReplyOptions = {
@@ -225,7 +228,7 @@ const paginationPage3: InteractionReplyOptions = {
                 .setLabel('Next')
                 .setStyle(1),
         )],
-    ephemeral: true
+    ...ephemeral
 };
 
 const paginationPage4: InteractionReplyOptions = {
@@ -249,7 +252,7 @@ const paginationPage4: InteractionReplyOptions = {
                 .setLabel('Previous')
                 .setStyle(1),
         )],
-    ephemeral: true
+    ...ephemeral
 };
 
 const paginationPages = new Map<string, InteractionReplyOptions>();
@@ -278,7 +281,7 @@ const paginationTest: SlashCommand = {
                 .setDescription('The page to go to.')
                 .setRequired(false))
         .toJSON(),
-    
+
     slashCommand(interaction) {
         const page = interaction.options.getInteger('page') || 1;
         const pageKey = `page${page}`;
@@ -291,8 +294,21 @@ const paginationTest: SlashCommand = {
 
     interact(interaction) {
         const customId = interaction.customId.split(':')[1];
-        if (paginationPages.has(customId)) {
-            interaction.reply(paginationPages.get(customId));
+        const page = paginationPages.get(customId);
+        if (page) {
+            if (ephemeral.ephemeral) {
+                interaction.reply(page);
+            } else {
+                const { content, components, embeds, files, attachments } = page;
+                interaction.message.edit({
+                    content,
+                    components,
+                    embeds,
+                    files,
+                    attachments
+                })
+                interaction.deferUpdate();
+            }
         }
     },
 }

@@ -1,11 +1,26 @@
 import { Bot } from '../bot';
-import { ButtonInteraction, CacheType, ChatInputCommandInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, ModalSubmitInteraction, SelectMenuInteraction, UserContextMenuCommandInteraction } from 'discord.js';
+import { ButtonInteraction, CacheType, ChatInputCommandInteraction, ContextMenuCommandInteraction, MessageContextMenuCommandInteraction, ModalSubmitInteraction, RESTPostAPIApplicationCommandsJSONBody, SelectMenuInteraction, UserContextMenuCommandInteraction } from 'discord.js';
 import path from 'path';
 import fs from 'fs';
 
 // A list of command categories.
 export type CommandCategory = 'admin' | 'fun' | 'moderation' | 'utility' | 'music' | 'misc';
 export const Categories: CommandCategory[] = ['admin', 'fun', 'moderation', 'utility', 'music', 'misc'];
+
+/**
+ * Instance of CommandManager.
+ */
+let _commandManager: CommandManager = null;
+
+/**
+ * Getter for CommandManager.
+ */
+export function getCommandManager(): CommandManager {
+    if (!_commandManager) {
+        throw new Error("CommandManager not initialized.");
+    }
+    return _commandManager;
+}
 
 /**
  * The command manager.
@@ -20,12 +35,30 @@ export class CommandManager {
     private userMenuCommands: Command[] = [];
     // List of only message menu commands.
     private messageMenuCommands: Command[] = [];
+    // Map of all commands by name.
+    public commandsByName = new Map<string, Command>();
+    // Map of only slash commands by name.
+    public slashCommandsByName = new Map<string, Command>();
+    // Map of only user menu commands by name.
+    public userMenuCommandsByName = new Map<string, Command>();
+    // Map of only message menu commands by name.
+    public messageMenuCommandsByName = new Map<string, Command>();
 
     constructor(private bot: Bot) {
+        if (_commandManager) {
+            throw new Error("CommandManager already initialized.");
+        }
         this.slashCommands = getCommands("slash"); // Get all slash commands.
         this.userMenuCommands = getCommands("user"); // Get all user menu commands.
         this.messageMenuCommands = getCommands("message"); // Get all message menu commands.
         this.commands = [...this.slashCommands, ...this.userMenuCommands, ...this.messageMenuCommands]; // Combine all commands.
+
+        // Add all commands to their respective maps.
+        this.slashCommands.forEach(c => this.slashCommandsByName.set(c.discordCommand.name, c));
+        this.userMenuCommands.forEach(c => this.userMenuCommandsByName.set(c.discordCommand.name, c));
+        this.messageMenuCommands.forEach(c => this.messageMenuCommandsByName.set(c.discordCommand.name, c));
+        this.commands.forEach(c => this.commandsByName.set(c.discordCommand.name, c));
+
         this.hook(); // Hook the interaction events.
     }
 
@@ -37,9 +70,7 @@ export class CommandManager {
      */
     public slash(command: string, interaction: ChatInputCommandInteraction<CacheType>): void {
         // Get the command.
-        const commandToExecute = this.slashCommands.find(
-            (c) => c.discordCommand.name === command
-        );
+        const commandToExecute = this.slashCommandsByName.get(command);
 
         if (commandToExecute) {
             // Execute the command if it exists.
@@ -62,9 +93,7 @@ export class CommandManager {
      */
     public userMenu(command: string, interaction: UserContextMenuCommandInteraction<CacheType>): void {
         // Get the command.
-        const commandToExecute = this.userMenuCommands.find(
-            (c) => c.discordCommand.name === command
-        );
+        const commandToExecute = this.userMenuCommandsByName.get(command);
 
         if (commandToExecute) {
             // Execute the command if it exists.
@@ -87,9 +116,7 @@ export class CommandManager {
      */
     public messageMenu(command: string, interaction: MessageContextMenuCommandInteraction<CacheType>): void {
         // Get the command.
-        const commandToExecute = this.messageMenuCommands.find(
-            (c) => c.discordCommand.name === command
-        );
+        const commandToExecute = this.messageMenuCommandsByName.get(command);
 
         if (commandToExecute) {
             // Execute the command if it exists.
@@ -115,7 +142,7 @@ export class CommandManager {
         const [commandName] = id.split(":");
 
         // Get the command.
-        const command = this.commands.find(c => c.discordCommand.name === commandName);
+        const command = this.commandsByName.get(commandName);
 
         if (command) {
             // Execute the command if it exists.
@@ -213,10 +240,20 @@ export function getAllCommands(): Command[] {
     return commands;
 }
 
-export function getCommands(dir: "slash" | "user" | "message"): Command[] {
+function getCommandsInDirectory(dir: string): Command[] {
     const files = fs.readdirSync(path.join(__dirname, `./${dir}`));
     const commands = files.map(file => {
-        return require(`./${dir}/${file}`).default;
-    });
+        if (file.endsWith(".js") || file.endsWith(".mjs") || file.endsWith(".cjs")) {
+            const command = require(path.join(__dirname, `./${dir}/${file}`)).default;
+            return command;
+        }
+        if (fs.lstatSync(path.join(__dirname, `./${dir}/${file}`)).isDirectory()) {
+            return getCommandsInDirectory(`${dir}/${file}`);
+        }
+    }).flat();
     return commands;
+}
+
+export function getCommands(dir: "slash" | "user" | "message"): Command[] {
+    return getCommandsInDirectory(dir);
 }

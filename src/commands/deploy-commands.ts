@@ -18,8 +18,8 @@ function removeCommands(...commands: string[]) {
 	getCommandIDs(commands).then(ids => {
 		for (const id of ids) {
 			rest.delete(`/applications/${clientId}/guilds/${guildId}/commands/${id}`)
-			.then(() => console.log(`Successfully removed command ${id}.`))
-			.catch(console.error);
+				.then(() => console.log(`Successfully removed command ${id}.`))
+				.catch(console.error);
 		}
 	});
 }

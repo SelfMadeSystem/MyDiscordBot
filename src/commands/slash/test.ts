@@ -313,4 +313,38 @@ const paginationTest: SlashCommand = {
     },
 }
 
-export default paginationTest;
+const anotherTest: SlashCommand = {
+    commandCategory: "misc",
+    help: {
+        name: "Test",
+        description: "Description for the test command.",
+        usage: "/test",
+        examples: [
+            "/test"
+        ]
+    },
+
+    discordCommand: new SlashCommandBuilder()
+        .setName('test')
+        .setDescription('Test command.')
+        .toJSON(),
+
+    async slashCommand(interaction) {
+        const roleId = '481549084499640341';
+
+        let message = "Users:";
+
+        await interaction.guild.members.fetch();
+        const role = await interaction.guild.roles.fetch(roleId);
+        if (role) {
+            role.members.forEach(member => {
+                console.log(member.user.tag);
+                message += `\n${member.user.tag}`;
+            });
+        }
+
+        interaction.reply({ content: message, ephemeral: true });
+    }
+}
+
+export default anotherTest;

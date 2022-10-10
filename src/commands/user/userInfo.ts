@@ -11,7 +11,7 @@ const command: UserMenuCommand = {
     },
     async userMenuCommand(interaction) {
         const member = await interaction.guild.members.fetch(interaction.targetId)
-            .catch((e) => { throw e });
+            .catch((e) => { throw e; });
         const embed = new EmbedBuilder()
             .setTitle(`${member.user.username}'s Info`)
             .setThumbnail(member.user.avatarURL())
@@ -34,6 +34,6 @@ const command: UserMenuCommand = {
         name: 'User Info',
         type: 2
     }
-}
+};
 
 export default command;

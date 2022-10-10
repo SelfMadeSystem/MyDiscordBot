@@ -15,6 +15,7 @@ interface VerifyMath {
     hash: string;
 }
 
+/* This is a list of basic arithmetic operations */
 const operations: [string, (a: number, b: number) => number][] = [
     ['+', (a, b) => a + b],
     ['-', (a, b) => a - b],
@@ -26,7 +27,22 @@ function randomInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function generateVerifyMath() {
+// The salt to add to the string before hashing it
+const salt = (() => {
+    const salt = createHash('sha256').update(Math.random().toString()).digest('hex');
+    return salt;
+})();
+
+/**
+ * It takes a string, adds a salt to it, and then hashes it
+ * @param {string} str - The string to hash.
+ * @returns A hash of the string
+ */
+function makeHash(str: string) {
+    return createHash('sha256').update(salt + str).digest('hex');
+}
+
+function generateVerifyMath(): VerifyMath {
     const rand = Math.floor(Math.random() * operations.length);
     const [op, func] = operations[rand];
 
@@ -56,12 +72,10 @@ function generateVerifyMath() {
 
     const answer = func(a, b);
     const expression = `${a} ${op} ${b}`;
-    const hash = createHash('sha256').update(expression).digest('hex');
+    const hash = makeHash(answer.toString());
 
     return { expression, answer, hash };
 }
-
-const verifies: Map<string, VerifyMath> = new Map();
 
 const command: SlashCommand = {
     commandCategory: 'moderation',
@@ -78,7 +92,6 @@ const command: SlashCommand = {
             return;
         }
         const verifyMath = generateVerifyMath();
-        verifies.set(verifyMath.hash, verifyMath);
 
         interaction.showModal(new ModalBuilder()
             .setCustomId(`verify:${verifyMath.hash}`)
@@ -93,11 +106,11 @@ const command: SlashCommand = {
 
     interact(interaction) {
         if (interaction.isModalSubmit()) {
-            const verifyMath = verifies.get(interaction.customId.split('-')[1]);
-            if (!verifyMath) return;
+            const testHash = interaction.customId.split(':')[1];
             const answer = interaction.fields.getTextInputValue('expression');
+            const answerHash = makeHash(answer);
             if (answer === '') return;
-            if (parseInt(answer) === verifyMath.answer) {
+            if (testHash === answerHash) {
                 interaction.reply({
                     ephemeral: true,
                     embeds: [new EmbedBuilder()
@@ -116,20 +129,10 @@ const command: SlashCommand = {
                     embeds: [new EmbedBuilder()
                         .setTitle('Incorrect')
                         .setDescription('Please use /verify again.')
-                        .addFields([{
-                            name: 'Expression',
-                            value: verifyMath.expression,
-                            inline: true,
-                        }, {
-                            name: 'Answer',
-                            value: verifyMath.answer.toString(),
-                            inline: true,
-                        }])
                         .setColor(randomColor()),
                     ],
                 });
             }
-            verifies.delete(verifyMath.hash);
         }
     },
 
@@ -146,6 +149,6 @@ const command: SlashCommand = {
         .setName(name)
         .setDescription("Verify you're not a bot.")
         .toJSON()
-}
+};
 
 export default command;

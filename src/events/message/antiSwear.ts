@@ -2,7 +2,7 @@ import { Handler } from "../messageHandler";
 
 const removeZeroWidth = (str: string) => {
     return str.replace(/\-|_|\./g, "");
-}
+};
 
 /* Examples:
 console.log(genRegex([
@@ -84,7 +84,7 @@ function genRegex(gen: RegexGen): string {
 // there's anything that you'd want to customize that's impossible for this
 // thing to generate.
 
-const expressions: { [key: string]: string } = Object.freeze({
+const expressions: { [key: string]: string; } = Object.freeze({
     "N-Word": "\\b(?!\\b(niger)\\b)((n)+(\\s|\\-|_|\\.)*((i|!|l|1)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((g|9|q)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((e|3)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*(r)+(\\s|\\-|_|\\.|s|5)*)+\\b",
     "N-Word with a": "\\b((n)+(\\s|\\-|_|\\.)*((i|!|l|1)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((g|9|q)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((a|4)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.|s)*)+\\b",
     "B-Word": "\\b((b)+(\\s|\\-|_|\\.)*((i|l|1|!)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((t|7)((\\s|\\-|_|\\.)*))*(\\s|\\-|_|\\.)*((c|\\()((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.)*((h|4)((\\s|\\-|_|\\.)*))+(\\s|\\-|_|\\.|e|3|s|5)*)+\\b",
@@ -112,6 +112,6 @@ const handler: Handler = {
             }
         }
     }
-}
+};
 
 export default handler;

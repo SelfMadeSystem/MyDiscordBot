@@ -6,53 +6,59 @@ import { randomColor } from '../../utils/utils';
 import { bot } from '../..';
 
 function genChoices(): APIApplicationCommandOptionChoice<string>[] {
-    const commands = getAllCommands()
+    const commands = getAllCommands();
 
     return commands.map(c => {
-        let name = getCommandName(c)
+        let name = getCommandName(c);
         return {
             name,
             value: name
-        }
-    })
+        };
+    });
 }
 
 function getCommandName(command: Command): string {
-    if (command.help) return command.help.name
-    return command.discordCommand.name
+    if (command.help) return command.help.name;
+    return command.discordCommand.name;
 }
+
+const commandDescriptionCache = new Map<Command, EmbedBuilder>();
 
 function getCommandDescription(command: Command): EmbedBuilder {
-    const embed = new EmbedBuilder()
-        .setColor(randomColor())
-    if (command.help) {
-        embed.setTitle(command.help.name)
-        embed.setDescription(command.help.description)
-        if (command.help.usage) embed.setFooter({ text: command.help.usage })
-        if (command.help.examples) embed.addFields({ name: 'Examples', value: command.help.examples.join('\n') })
-    } else {
-        embed.setTitle(command.discordCommand.name)
-        embed.setDescription(command.discordCommand.description)
+    if (commandDescriptionCache.has(command)) {
+        return commandDescriptionCache.get(command);
     }
-    return embed
+    const embed = new EmbedBuilder()
+        .setColor(randomColor());
+    if (command.help) {
+        embed.setTitle(command.help.name);
+        embed.setDescription(command.help.description);
+        if (command.help.usage) embed.setFooter({ text: command.help.usage });
+        if (command.help.examples) embed.addFields({ name: 'Examples', value: command.help.examples.join('\n') });
+    } else {
+        embed.setTitle(command.discordCommand.name);
+        embed.setDescription(command.discordCommand.description);
+    }
+    commandDescriptionCache.set(command, embed);
+    return embed;
 }
 
-var _helpGeneric: InteractionReplyOptions = null;
+let _helpGeneric: InteractionReplyOptions = null;
 
 function helpGeneric() {
     if (_helpGeneric) return _helpGeneric;
-    const commands = getAllCommands()
-    const commandList = commands.map(c => getCommandName(c))
+    const commands = getAllCommands();
+    const commandList = commands.map(c => getCommandName(c));
     const commandListEmbed = new EmbedBuilder()
         .setTitle("Command List")
         .setDescription(`Use \`/help [command]\` to get more information about a command.`)
         .setColor("#fff")
-        .setFooter(bot.footer)
+        .setFooter(bot.footer);
     for (let cat of Categories) {
-        const categoryCommands = getCommandsByCategory(cat)
-        if (categoryCommands.length === 0) continue
-        const categoryCommandList = categoryCommands.map(c => getCommandName(c))
-        commandListEmbed.addFields({ name: cat.charAt(0).toUpperCase() + cat.slice(1), value: categoryCommandList.join('\n'), inline: true })
+        const categoryCommands = getCommandsByCategory(cat);
+        if (categoryCommands.length === 0) continue;
+        const categoryCommandList = categoryCommands.map(c => getCommandName(c));
+        commandListEmbed.addFields({ name: cat.charAt(0).toUpperCase() + cat.slice(1), value: categoryCommandList.join('\n'), inline: true });
     }
     return _helpGeneric = {
         embeds: [commandListEmbed],
@@ -67,14 +73,14 @@ function helpGeneric() {
                         return {
                             label: c,
                             value: c
-                        }
+                        };
                     }))
             )],
         ephemeral: true,
-    }
+    };
 }
 
-const command: SlashCommand & { _discordCommand: any } = {
+const command: SlashCommand & { _discordCommand: any; } = {
     commandCategory: 'utility',
     help: {
         name: 'Help',
@@ -86,41 +92,45 @@ const command: SlashCommand & { _discordCommand: any } = {
     slashCommand: async (interaction: ChatInputCommandInteraction<CacheType>) => {
         const cmdName = interaction.options.getString("command");
         if (cmdName) {
-            const command = getAllCommands().find(c => c.help && c.help.name == cmdName || c.discordCommand.name == cmdName)
+            const command = getAllCommands().find(c =>
+                c.help && c.help.name == cmdName ||
+                c.discordCommand.name == cmdName);
             if (command) {
-                const embed = getCommandDescription(command)
+                const embed = getCommandDescription(command);
                 interaction.reply({
                     ephemeral: true,
                     embeds: [embed]
-                })
+                });
             } else {
-                interaction.reply("Command not found.")
+                interaction.reply("Command not found.");
             }
         } else {
-            interaction.reply(helpGeneric())
+            interaction.reply(helpGeneric());
         }
     },
 
     interact: async (interaction: ButtonInteraction | SelectMenuInteraction | ModalSubmitInteraction) => {
         switch (interaction.customId) {
             case "help:generic":
-                const cmdName = (interaction as SelectMenuInteraction).values[0]
+                const cmdName = (interaction as SelectMenuInteraction).values[0];
                 if (cmdName) {
-                    const command = getAllCommands().find(c => c.help && c.help.name == cmdName || c.discordCommand.name == cmdName)
+                    const command = getAllCommands().find(c =>
+                        c.help && c.help.name == cmdName ||
+                        c.discordCommand.name == cmdName);
                     if (command) {
-                        const embed = getCommandDescription(command)
+                        const embed = getCommandDescription(command);
                         interaction.reply({
                             embeds: [embed],
                             ephemeral: true
-                        })
+                        });
                     } else {
                         interaction.reply({
                             content: "Command not found.",
                             ephemeral: true
-                        })
+                        });
                     }
                 } else {
-                    interaction.reply(helpGeneric())
+                    interaction.reply(helpGeneric());
                 }
                 break;
         }
@@ -129,7 +139,7 @@ const command: SlashCommand & { _discordCommand: any } = {
     _discordCommand: null,
 
     get discordCommand() {
-        if (this._discordCommand) return this._discordCommand
+        if (this._discordCommand) return this._discordCommand;
         return this._discordCommand = new SlashCommandBuilder()
             .setName('help')
             .setDescription('Shows this help message')
@@ -139,8 +149,8 @@ const command: SlashCommand & { _discordCommand: any } = {
                 .setRequired(false)
                 .addChoices(...genChoices())
             )
-            .toJSON()
+            .toJSON();
     }
-}
+};
 
 export default command;

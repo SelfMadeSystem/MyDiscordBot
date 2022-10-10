@@ -5,7 +5,7 @@ import fs from 'fs';
 
 // A list of command categories.
 export type CommandCategory = 'admin' | 'fun' | 'moderation' | 'utility' | 'music' | 'misc';
-export const Categories: CommandCategory[] = ['admin', 'fun', 'moderation', 'utility', 'music', 'misc']
+export const Categories: CommandCategory[] = ['admin', 'fun', 'moderation', 'utility', 'music', 'misc'];
 
 /**
  * The command manager.

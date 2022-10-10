@@ -20,10 +20,10 @@ const command: SlashCommand = {
                     .setColor(randomColor())
                     .setFooter(bot.footer),
             ]
-        })
+        });
     },
 
     discordCommand: new SlashCommandBuilder().setName('ping').setDescription('Sends pong with the milliseconds delay.').toJSON()
-}
+};
 
 export default command;

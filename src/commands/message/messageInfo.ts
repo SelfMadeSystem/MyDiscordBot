@@ -12,7 +12,7 @@ const command: MessageMenuCommand = {
     async messageMenuCommand(interaction) {
         const channel = interaction.channel as TextChannel;
         const message = await channel.messages.fetch(interaction.targetId)
-            .catch((e) => { throw e });
+            .catch((e) => { throw e; });
         const member = await message.guild.members.fetch(message.author.id);
         const embed = new EmbedBuilder()
             .setTitle(`Message Info`)
@@ -29,17 +29,17 @@ const command: MessageMenuCommand = {
                 { name: `Mentioned Roles`, value: message.mentions.roles.size > 0 ? message.mentions.roles.map(role => role.name).join('\n') : 'None' },
                 { name: `Mentioned Channels`, value: message.mentions.channels.size > 0 ? message.mentions.channels.map(channel => (channel as BaseGuildTextChannel).name).join('\n') : 'None' },
                 { name: `Mentioned Everyone`, value: message.mentions.everyone ? 'Yes' : 'No' })
-            .setFooter(bot.footer)
+            .setFooter(bot.footer);
 
         interaction.reply({
             embeds: [embed],
             ephemeral: true,
-        })
+        });
     },
     discordCommand: {
         name: 'Message Info',
         type: 3
     }
-}
+};
 
 export default command;

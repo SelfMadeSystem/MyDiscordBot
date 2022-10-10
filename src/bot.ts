@@ -30,7 +30,12 @@ export class Bot {
     constructor(private readonly token: Snowflake,
         private readonly publicKey: string) {
         this.client = new Client({
-            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.MessageContent],
+            intents: [GatewayIntentBits.Guilds,
+            GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.GuildMessageReactions,
+            GatewayIntentBits.MessageContent,
+            GatewayIntentBits.GuildMembers,
+            ],
             partials: [Partials.Message, Partials.Channel, Partials.Reaction],
         });
     }

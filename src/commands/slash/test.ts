@@ -299,13 +299,12 @@ const paginationTest: SlashCommand = {
             if (ephemeral.ephemeral) {
                 interaction.reply(page);
             } else {
-                const { content, components, embeds, files, attachments } = page;
+                const { content, components, embeds, files } = page;
                 interaction.message.edit({
                     content,
                     components,
                     embeds,
-                    files,
-                    attachments
+                    files
                 })
                 interaction.deferUpdate();
             }
@@ -347,4 +346,4 @@ const anotherTest: SlashCommand = {
     }
 }
 
-export default anotherTest;
+export default paginationTest;

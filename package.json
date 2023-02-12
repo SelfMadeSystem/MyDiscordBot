@@ -12,11 +12,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/rest": "^1.0.1",
-    "discord-api-types": "^0.37.1",
-    "discord.js": "^14.2.0",
-    "json5": "^2.2.1",
+    "@discordjs/builders": "^1.4.0",
+    "@discordjs/rest": "^1.5.0",
+    "discord-api-types": "^0.37.33",
+    "discord.js": "^14.7.1",
+    "json5": "^2.2.3",
     "tweetnacl-ts": "^1.0.3",
-    "typescript": "^4.7.4"
+    "typescript": "^4.9.5"
   }
 }
